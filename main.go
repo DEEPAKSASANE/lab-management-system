@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -13,7 +14,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Structs
 type InvoiceSummary struct {
 	SrNo           int
 	InvoiceID      int
@@ -48,7 +48,11 @@ type Invoice struct {
 }
 
 func main() {
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=root dbname=wellness_invoice sslmode=disable")
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		connStr = "host=localhost port=5432 user=postgres password=root dbname=wellness_invoice sslmode=disable"
+	}
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
@@ -68,12 +72,14 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./static")
 
-	// Registration Page
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusSeeOther, "/login")
+	})
+
 	r.GET("/register", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "register.html", nil)
 	})
 
-	// Registration Handler
 	r.POST("/register", func(c *gin.Context) {
 		name := c.PostForm("name")
 		address := c.PostForm("address")
@@ -97,12 +103,10 @@ func main() {
 		c.Redirect(http.StatusSeeOther, "/login")
 	})
 
-	// Login Page
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", nil)
 	})
 
-	// Login Handler
 	r.POST("/login", func(c *gin.Context) {
 		username := c.PostForm("username")
 		password := c.PostForm("password")
@@ -116,12 +120,6 @@ func main() {
 		c.HTML(http.StatusOK, "form.html", gin.H{"Username": dbUsername})
 	})
 
-	// Home route
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusSeeOther, "/login")
-	})
-
-	// Invoice Form Submission
 	r.POST("/submit", func(c *gin.Context) {
 		customerName := c.PostForm("customer_name")
 		mobile := c.PostForm("mobile")
@@ -193,16 +191,16 @@ func main() {
 		c.HTML(http.StatusOK, "invoice.html", invoice)
 	})
 
-	// Invoice Summary
 	r.GET("/print", invoiceSummaryHandler(db))
-
-	// Filter By Date
 	r.GET("/filter", filterInvoicesHandler(db))
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	r.Run(":" + port)
 }
 
-// Summary Handler
 func invoiceSummaryHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rows, err := db.Query(`
@@ -257,7 +255,6 @@ func invoiceSummaryHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// Filter Handler
 func filterInvoicesHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := c.Query("start")
@@ -330,7 +327,6 @@ func filterInvoicesHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// Amount to Words Function
 func convertToWords(num int) string {
 	ones := []string{"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
 		"Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
