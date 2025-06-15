@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create Invoice</title>
+   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #19c8fd;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      background: hsl(180, 17%, 90%);
+      padding: 30px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button {
+      padding: 10px 16px;
+      margin: 5px 2px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button[type="submit"] {
+      background-color: #667eea;
+      color: #fff;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .total {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: right;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .total p {
+      margin: 5px 0;
+    }
+    button[onclick^="addRow"] {
+      background-color: #48bb78;
+      color: #fff;
+    }
+    button[onclick^="deleteRow"] {
+      background-color: #e53e3e;
+      color: white;
+    }
+    button[onclick^="updateRow"] {
+      background-color: #3182ce;
+      color: rgb(240, 231, 231);
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td, th {
+        text-align: right;
+        position: relative;
+        padding-left: 50%;
+      }
+      td::before, th::before {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Medical Invoice Form</h1>
+    <form id="invoiceForm" method="POST" action="/submit">
+      <input class="form-control" type="text" name="customer_name" placeholder="Patient Name" required />
+      <input class="form-control" type="text" name="mobile" placeholder="Mobile" required />
+
+      <select class="form-control" name="gender" required>
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+
+      <textarea class="form-control" name="address" placeholder="Address" required></textarea>
+
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Price (₹)</th>
+            <th>Discount (%)</th>
+            <th>Total (₹)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+          <td>
+  <select class="form-control" name="service[]" onchange="updatePrice(this)">
+    <option value="">Select Test</option>
+      
+  <option value="1. Albumin |150">1. Albumin </option>
+  <option value="2. Alkaline Phosphate|150">2. Alkaline Phosphate </option>
+  <option value="3. Amalyse|700">3. Amalyse </option>
+  <option value="4. AMH|1250">4. AMH </option>
+  <option value="5. ANA|900">5. ANA </option>
+  <option value="6. ANC Profile|1200">6. ANC Profile </option>
+  <option value="7. Anti CCP|950">7. Anti CCP</option>
+  <option value="8. APTT|400">8. APTT </option>
+  <option value="9. ASO|700">9. ASO </option>
+  <option value="10. ATG|700">10. ATG – ₹700</option>
+  <option value="11. Beta HCG|600">11. Beta HCG – ₹600</option>
+  <option value="12. Blood Group Rh Factor|100">12. Blood Group Rh Factor – ₹100</option>
+  <option value="13. Blood Sugar Fasting|40">13. Blood Sugar Fasting – ₹40</option>
+  <option value="14. Blood sugar HGT Strip|40">14. Blood sugar HGT Strip – ₹40</option>
+  <option value="15. Blood Sugar PP|40">15. Blood Sugar PP – ₹40</option>
+  <option value="16. BLOOD TEST|500">16. BLOOD TEST – ₹500</option>
+  <option value="17. Blood Urea Nitrogen|150">17. Blood Urea Nitrogen – ₹150</option>
+  <option value="18. BTCT|100">18. BTCT – ₹100</option>
+  <option value="19. BUN|150">19. BUN – ₹150</option>
+  <option value="20. CA 125|800">20. CA 125 – ₹800</option>
+  <option value="21. CA 19.9|900">21. CA 19.9 – ₹900</option>
+  <option value="22. Calcium|150">22. Calcium – ₹150</option>
+  <option value="23. CBC|98">23. CBC – ₹98</option>
+  <option value="24. CEA|700">24. CEA – ₹700</option>
+  <option value="25. Chicken Guniya IGM|1000">25. Chicken Guniya IGM – ₹1000</option>
+  <option value="26. Cholesterol|150">26. Cholesterol – ₹150</option>
+  <option value="27. Consultation|10">27. Consultation – ₹10</option>
+  <option value="28. Consultation|100">28. Consultation – ₹100</option>
+  <option value="29. CPK MB|1000">29. CPK MB – ₹1000</option>
+  <option value="30. CPK Total|800">30. CPK Total – ₹800</option>
+  <option value="31. CRP|400">31. CRP – ₹400</option>
+  <option value="32. CT Scan|500">32. CT Scan – ₹500</option>
+  <option value="33. CT Scan 2|1000">33. CT Scan 2 – ₹1000</option>
+  <option value="34. D- Dimmer|1200">34. D- Dimmer – ₹1200</option>
+  <option value="35. Dengue IGG/IGM|800">35. Dengue IGG/IGM – ₹800</option>
+  <option value="36. Dengue NS1|500">36. Dengue NS1 – ₹500</option>
+  <option value="37. Dengue Profile|1100">37. Dengue Profile – ₹1100</option>
+  <option value="38. Dressing|1100">38. Dressing – ₹1100</option>
+  <option value="39. Dual Marker|50">39. Dual Marker – ₹50</option>
+  <option value="40. E2|2900">40. E2 – ₹2900</option>
+  <option value="41. ECG|700">41. ECG – ₹700</option>
+  <option value="42. Electrolytes|100">42. Electrolytes – ₹100</option>
+  <option value="43. ESR|400">43. ESR – ₹400</option>
+  <option value="44. Ferratin|100">44. Ferratin – ₹100</option>
+  <option value="45. Fever Profile|900">45. Fever Profile – ₹900</option>
+  <option value="46. Free PSA|440">46. Free PSA – ₹440</option>
+  <option value="47. Free Testesteron|1300">47. Free Testesteron – ₹1300</option>
+  <option value="48. Free Thyroid Function Test (FTFT)|1200">48. Free Thyroid Function Test (FTFT) – ₹1200</option>
+  <option value="49. FSH|600">49. FSH – ₹600</option>
+  <option value="50. Full Body Commercial|350">50. Full Body Commercial – ₹350</option>
+  <option value="51. Full Body Platinum|1100">51. Full Body Platinum – ₹1100</option>
+  <option value="52. G6PD|2200">52. G6PD – ₹2200</option>
+  <option value="53. HAV IGG/IGM|600">53. HAV IGG/IGM – ₹600</option>
+  <option value="54. HB|1800">54. HB – ₹1800</option>
+  <option value="55. HB Electro Phoresis|70">55. HB Electro Phoresis – ₹70</option>
+  <option value="56. HBA1C|900">56. HBA1C – ₹900</option>
+  <option value="57. HBsag|330">57. HBsag – ₹330</option>
+  <option value="58. HCV|300">58. HCV – ₹300</option>
+  <option value="59. HEV IGG/IGM|400">59. HEV IGG/IGM – ₹400</option>
+  <option value="60. HIV|1800">60. HIV – ₹1800</option>
+  <option value="61. HLAB27|400">61. HLAB27 – ₹400</option>
+  <option value="62. Homocystine Level|900">62. Homocystine Level – ₹900</option>
+  <option value="63. IGE level|1100">63. IGE level – ₹1100</option>
+  <option value="64. Injection|600">64. Injection – ₹600</option>
+  <option value="65. Insulin Fasting|50">65. Insulin Fasting – ₹50</option>
+  <option value="66. Insulin Post Lunch|800">66. Insulin Post Lunch – ₹800</option>
+  <option value="67. Iron|600">67. Iron – ₹600</option>
+  <option value="68. LDH|900">68. LDH – ₹900</option>
+  <option value="69. LH|700">69. LH – ₹700</option>
+  <option value="70. Lipase|350">70. Lipase – ₹350</option>
+  <option value="71. Lipid Profile|700">71. Lipid Profile – ₹700</option>
+  <option value="72. Liver Function Test (LFT)|350">72. Liver Function Test (LFT) – ₹350</option>
+  <option value="73. Malaria Parasite|350">73. Malaria Parasite – ₹350</option>
+  <option value="74. MP Antigen|100">74. MP Antigen – ₹100</option>
+  <option value="75. MRI|250">75. MRI – ₹250</option>
+  <option value="76. MRI 2|500">76. MRI 2 – ₹500</option>
+  <option value="77. Peripheral Smear (PS)|1000">77. Peripheral Smear (PS) – ₹1000</option>
+  <option value="78. Prolactin|150">78. Prolactin – ₹150</option>
+  <option value="79. Protein Electro Phoresis|350">79. Protein Electro Phoresis – ₹350</option>
+  <option value="80. PS for MP|800">80. PS for MP – ₹800</option>
+  <option value="81. PSA Total|200">81. PSA Total – ₹200</option>
+  <option value="82. PT INR|700">82. PT INR – ₹700</option>
+  <option value="83. Quadriple Marker|400">83. Quadriple Marker – ₹400</option>
+  <option value="84. RA Factor|3100">84. RA Factor – ₹3100</option>
+  <option value="85. Renal Function Test RFT (Maxi)|300">85. Renal Function Test RFT (Maxi) – ₹300</option>
+  <option value="86. Renal Function Test RFT (Mini)|900">86. Renal Function Test RFT (Mini) – ₹900</option>
+  <option value="87. Retic Count|400">87. Retic Count – ₹400</option>
+  <option value="88. Serum Billirubin|300">88. Serum Billirubin – ₹300</option>
+  <option value="89. Serum Createnine|150">89. Serum Createnine – ₹150</option>
+  <option value="90. SGOT|100">90. SGOT </option>
+  <option value="91. SGPT|150">91. SGPT </option>
+  <option value="92. Stool Alucard Blood|150">92. Stool Alucard Blood </option>
+  <option value="93. Stool C/S|400">93. Stool C/S </option>
+  <option value="94. Stool R/M|900">94. Stool R/M </option>
+  <option value="95. Testesteron|200">95. Testesteron </option>
+  <option value="96. TFT Thyroid Function Test|800">96. TFT Thyroid Function Test </option>
+  <option value="97. Total Protein|300">97. Total Protein </option>
+  <option value="98. TPO|150">98. TPO </option>
+  <option value="99. Triglycarides|900">99. Triglycarides </option>
+  <option value="100. Trop I|150">100. Trop I </option>
+  <option value="101. Trop T|800">101. Trop T </option>
+  <option value="102. TSH|800">102. TSH </option>
+  <option value="103. Typhi IGG/IGM|150">103. Typhi IGG/IGM </option>
+  <option value="104. Uric Acid|100">104. Uric Acid </option>
+  <option value="105. Urine C/S|150">105. Urine C/S </option>
+  <option value="106. Urine microalbumin creatinine ratio|900">106. Urine microalbumin creatinine ratio </option>
+  <option value="107. Urine R/M|700">107. Urine R/M </option>
+  <option value="108. USG|100">108. USG </option>
+  <option value="109. VDRL|200">109. VDRL </option>
+  <option value="110. VIT B 12|250">110. VIT B 12 </option>
+  <option value="111. VIT D3|700">111. VIT D3 </option>
+  <option value="112. Widal|700">112. Widal </option>
+  <option value="113. X-RAY One Shoot|110">113. X-RAY One Shoot </option>
+  <option value="114. NA|50">114. NA </option>
+</select>
+
+</td>
+
+            <td><input class="form-control" type="number" name="price[]" readonly /></td>
+            <td><input class="form-control" type="number" name="discount[]" value="0" min="0" max="100" oninput="calculateTotal(this)" /></td>
+            <td><input class="form-control" type="number" name="total[]" readonly /></td>
+            <td>
+              <button type="button" onclick="updateRow(this)">Update</button>
+
+              <button type="button" onclick="deleteRow(this)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button type="button" onclick="addRow()">+ Add Another Test</button>
+
+      <div class="total">
+        <p>Grand Total: ₹<span id="grandTotal">0</span></p>
+        <p>Amount in Words: <span id="amountInWords">Zero Rupees</span></p>
+      </div>
+
+      <button type="submit">Invoice Print</button>
+    </form>
+  </div>
+
+  <script>
+    function updatePrice(select) {
+      const row = select.closest("tr");
+      const priceField = row.querySelector('[name="price[]"]');
+      const discountField = row.querySelector('[name="discount[]"]');
+      const totalField = row.querySelector('[name="total[]"]');
+      const [testName, price] = select.value.split('|');
+      priceField.value = price || 0;
+      discountField.value = 0;
+      totalField.value = price || 0;
+      updateGrandTotal();
+    }
+
+    function calculateTotal(discountInput) {
+      const row = discountInput.closest("tr");
+      const price = parseFloat(row.querySelector('[name="price[]"]').value || 0);
+      let discount = parseFloat(discountInput.value || 0);
+      discount = Math.min(Math.max(discount, 0), 100); // Clamp 0–100
+      const total = price - (price * discount / 100);
+      row.querySelector('[name="total[]"]').value = total.toFixed(2);
+      updateGrandTotal();
+    }
+
+    function addRow() {
+      const tableBody = document.querySelector("#itemTable tbody");
+      const newRow = tableBody.rows[0].cloneNode(true);
+      newRow.querySelectorAll("input").forEach(input => input.value = "");
+      newRow.querySelector("select").selectedIndex = 0;
+      tableBody.appendChild(newRow);
+    }
+
+    function updateRow(button) {
+      const row = button.closest("tr");
+      const price = parseFloat(row.querySelector('[name="price[]"]').value || 0);
+      const discount = parseFloat(row.querySelector('[name="discount[]"]').value || 0);
+      const total = price - (price * discount / 100);
+      row.querySelector('[name="total[]"]').value = total.toFixed(2);
+      updateGrandTotal();
+    }
+
+    function deleteRow(button) {
+      const row = button.closest("tr");
+      const tableBody = document.querySelector("#itemTable tbody");
+      if (tableBody.rows.length > 1) {
+        row.remove();
+        updateGrandTotal();
+      } else {
+        alert("At least one test must remain.");
+      }
+    }
+
+    function updateGrandTotal() {
+      let grandTotal = 0;
+      document.querySelectorAll('[name="total[]"]').forEach(input => {
+        grandTotal += parseFloat(input.value || 0);
+      });
+      document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+      document.getElementById("amountInWords").innerText = convertToWords(Math.floor(grandTotal)) + " Rupees";
+    }
+
+    function convertToWords(num) {
+      const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+                 "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
+                 "Eighteen", "Nineteen"];
+      const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+      if (num === 0) return "Zero";
+      if (num > 9999) return "Amount too large";
+
+      let words = "";
+      if (Math.floor(num / 1000) > 0) {
+        words += a[Math.floor(num / 1000)] + " Thousand ";
+        num %= 1000;
+      }
+      if (Math.floor(num / 100) > 0) {
+        words += a[Math.floor(num / 100)] + " Hundred ";
+        num %= 100;
+      }
+      if (num > 0) {
+        if (num < 20) {
+          words += a[num];
+        } else {
+          words += b[Math.floor(num / 10)] + " " + a[num % 10];
+        }
+      }
+      return words.trim();
+    }
+  </script>
+</body>
+</html>
+
